@@ -8,6 +8,10 @@ powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\Build-Nxt.ps1" -Jobs 
 
 If you're having any trouble after reading through this `README`, feel free to ask for help in the Support text channels. Please keep in mind that we do not condone piracy.
 
+<img width="1657" height="858" alt="674018009-e32c9423-c251-4e6b-b955-ad5ae4ff5087" src="https://github.com/user-attachments/assets/36092826-cefb-4f3e-9ded-5a12a494b485" />
+
+<img width="1660" height="933" alt="674017892-61c50dda-8b12-4df1-a77c-aefcab88aa3b" src="https://github.com/user-attachments/assets/979890b0-c1c1-46cf-95ec-75239d664478" />
+
 # Quick Start
 
 The Ship does not include any copyrighted assets.  You are required to provide a supported copy of the game.
