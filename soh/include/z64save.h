@@ -227,7 +227,6 @@ typedef struct {
 typedef struct ShipRandomizerSaveContextData {
     u8 triforcePiecesCollected;
     u8 bombchuUpgradeLevel;
-    u8 nayrusLoveUses;
     s8 silverShadowBlades;
     s8 silverShadowPit;
     s8 silverShadowSpikes;
@@ -267,6 +266,15 @@ typedef struct ShipQuestSaveContextData {
     ShipQuestSpecificSaveContextData data;
 } ShipQuestSaveContextData;
 
+// NXT progression is a versioned optional JSON section, isolated per save slot.
+typedef struct NxtRpgSaveData {
+    u32 level;
+    u32 xp;
+    u32 kills;
+    u32 bossKills;
+    u32 bossCooldown[5];
+} NxtRpgSaveData;
+
 typedef struct ShipSaveContextData {
     u16 pendingSale;
     u16 pendingSaleMod;
@@ -279,6 +287,7 @@ typedef struct ShipSaveContextData {
     //TODO: Move non-rando specific flags to a new sohInf and move the remaining randomizerInf to ShipRandomizerSaveContextData
     u16 randomizerInf[(RAND_INF_MAX + 15) / 16];
     u8 resetToSpawn;
+    NxtRpgSaveData nxt;
 } ShipSaveContextData;
 
 #pragma endregion

@@ -3,6 +3,7 @@
 #include "soh/Enhancements/randomizer/static_data.h"
 #include "soh/Enhancements/randomizer/SeedContext.h"
 #include "soh/Enhancements/randomizer/entrance.h"
+#include "soh/Enhancements/debugger/performanceTimer.h"
 
 #include <fstream>
 #include <spdlog/spdlog.h>
@@ -42,7 +43,7 @@ bool LocationAccess::CheckConditionAtAgeTime(bool& age, bool& time) const {
 }
 
 bool LocationAccess::ConditionsMet(Region* parentRegion, bool calculatingAvailableChecks) const {
-    // WARNING entrance validation can run this after resetting the access for sphere 0 validation
+    // WARNING enterance validation can run this after resetting the access for sphere 0 validation
     // When refactoring ToD access, either fix the above or do not assume that we
     // have any access at all just because this is being run
     bool conditionsMet = false;
@@ -431,6 +432,7 @@ bool Region::TimePass() {
 
 void Region::ApplyTimePass() {
     if (TimePass()) {
+        StartPerformanceTimer(PT_TOD_ACCESS);
         if (Child()) {
             childDay = true;
             childNight = true;
@@ -443,11 +445,13 @@ void Region::ApplyTimePass() {
             RegionTable(RR_ROOT)->adultDay = true;
             RegionTable(RR_ROOT)->adultNight = true;
         }
+        StopPerformanceTimer(PT_TOD_ACCESS);
     }
 }
 
 bool Region::UpdateEvents() {
     bool eventsUpdated = false;
+    StartPerformanceTimer(PT_EVENT_ACCESS);
     for (EventAccess& event : events) {
         // If the event has already happened, there's no reason to check it
         if (event.GetEvent()) {
@@ -462,6 +466,7 @@ bool Region::UpdateEvents() {
             eventsUpdated = true;
         }
     }
+    StopPerformanceTimer(PT_EVENT_ACCESS);
     return eventsUpdated;
 }
 
@@ -507,7 +512,7 @@ bool Region::AllAccountedFor() const {
     }
 
     for (const LocationAccess& loc : locations) {
-        if (!(ctx->GetItemLocation(loc.GetLocation())->IsAddedToPool())) {
+        if (!(Rando::Context::GetInstance()->GetItemLocation(loc.GetLocation())->IsAddedToPool())) {
             return false;
         }
     }
@@ -865,6 +870,8 @@ bool AnyAgeTime(ConditionFn condition) {
 }
 
 bool CanPlantBean(const RandomizerGet bean) {
+    auto ctx = Rando::Context::GetInstance();
+    auto logic = ctx->GetLogic();
     return logic->HasItem(bean) && logic->GetAmmo(ITEM_BEAN) > 0 &&
            (logic->IsChild || ctx->GetOption(RSK_SKIP_PLANTING_BEANS));
 }

@@ -1,4 +1,5 @@
-﻿#include "SohMenu.h"
+#include "SohMenu.h"
+#include "soh/Enhancements/NxtRpg/NxtGui.h"
 #include <soh/Enhancements/enhancementTypes.h>
 #include "soh/Enhancements/SwitchAge.h"
 #include "soh/Enhancements/AdultMasks.h"
@@ -197,6 +198,13 @@ static WidgetFunc HideQuestPreFunc(Quest quest) {
 void SohMenu::AddMenuEnhancements() {
     // Add Enhancements Menu
     AddMenuEntry("Enhancements", CVAR_SETTING("Menu.EnhancementsSidebarSection"));
+
+    WidgetPath nxtPath = { "Enhancements", "NXT RPG", SECTION_COLUMN_1 };
+    AddSidebarEntry("Enhancements", nxtPath.sidebarName, 1);
+    AddWidget(nxtPath, "Ocarina of Time NXT", WIDGET_SEPARATOR_TEXT);
+    AddWidget(nxtPath, "Open RPG control panel", WIDGET_BUTTON)
+        .Options(ButtonOptions().Tooltip("Player stats, adventurer population, encounters, world bosses and HUD settings.").Size(Sizes::Inline))
+        .Callback([](WidgetInfo&) { Nxt::OpenSettings(); });
 
     // Quality of Life
     WidgetPath path = { "Enhancements", "Quality of Life", SECTION_COLUMN_1 };
@@ -1516,14 +1524,6 @@ void SohMenu::AddMenuEnhancements() {
         .Options(IntSliderOptions().Min(-5).Max(5).DefaultValue(0).Format("%+d").Tooltip(
             "-5 will be half as much time, +5 will be 6x as much time. Affects timed switches, torches, GTG statue "
             "eyes, & doors in race with Dampe."));
-    AddWidget(path, "Minimum Heat/Water Timer: %d seconds", WIDGET_CVAR_SLIDER_INT)
-        .CVar(CVAR_ENHANCEMENT("HazardTimerMin"))
-        .Options(IntSliderOptions()
-                     .Min(0)
-                     .Max(150)
-                     .DefaultValue(0)
-                     .Format("%d seconds")
-                     .Tooltip("Limits how low heat timer or underwater timer can start."));
     AddWidget(path, "Always Win Goron Pot", WIDGET_CVAR_CHECKBOX)
         .CVar(CVAR_ENHANCEMENT("GoronPot"))
         .Options(CheckboxOptions().Tooltip("Always get the Heart Piece/Purple Rupee from the Spinning Goron Pot."));

@@ -1,6 +1,3 @@
-#include <array>
-#include <type_traits>
-#include <utility>
 #include <spdlog/spdlog.h>
 
 #include "logic.h"
@@ -79,7 +76,7 @@ bool Logic::HasItem(RandomizerGet itemName) {
         case RG_MASTER_SWORD:
         case RG_IRON_BOOTS:
         case RG_HOVER_BOOTS:
-            return CheckEquipment(RandoGetToEquipFlag[itemName]);
+            return CheckEquipment(RandoGetToEquipFlag.at(itemName));
         case RG_PROGRESSIVE_GORONSWORD:
         case RG_GIANTS_KNIFE:
             // progressive leaves Medigoron replacing broken knives, so the first one has to be found
@@ -124,7 +121,7 @@ bool Logic::HasItem(RandomizerGet itemName) {
             // Misc Quest Items
         case RG_STONE_OF_AGONY:
         case RG_GERUDO_MEMBERSHIP_CARD:
-            return CheckQuestItem(RandoGetToQuestItem[itemName]);
+            return CheckQuestItem(RandoGetToQuestItem.at(itemName));
         case RG_DOUBLE_DEFENSE:
             return GetSaveContext()->isDoubleDefenseAcquired;
             // Masks
@@ -191,7 +188,7 @@ bool Logic::HasItem(RandomizerGet itemName) {
         case RG_ZORAS_RIVER_BEAN_SOUL:
         case RG_SKELETON_KEY:
         case RG_RUTOS_LETTER:
-            return CheckRandoInf(StaticData::RandoGetToRandInf[itemName]);
+            return CheckRandoInf(StaticData::RandoGetToRandInf.at(itemName));
             // Boss Souls
         case RG_GOHMA_SOUL:
         case RG_KING_DODONGO_SOUL:
@@ -201,10 +198,10 @@ bool Logic::HasItem(RandomizerGet itemName) {
         case RG_MORPHA_SOUL:
         case RG_BONGO_BONGO_SOUL:
         case RG_TWINROVA_SOUL:
-            return !ctx->GetOption(RSK_SHUFFLE_BOSS_SOULS) || CheckRandoInf(StaticData::RandoGetToRandInf[itemName]);
+            return !ctx->GetOption(RSK_SHUFFLE_BOSS_SOULS) || CheckRandoInf(StaticData::RandoGetToRandInf.at(itemName));
         case RG_GANON_SOUL:
             return ctx->GetOption(RSK_GANONS_SOUL).Is(RO_GANONS_SOUL_STARTWITH) ||
-                   CheckRandoInf(StaticData::RandoGetToRandInf[itemName]);
+                   CheckRandoInf(StaticData::RandoGetToRandInf.at(itemName));
             // Overworld Keys
         case RG_GUARD_HOUSE_KEY:
         case RG_MARKET_BAZAAR_KEY:
@@ -231,7 +228,7 @@ bool Logic::HasItem(RandomizerGet itemName) {
         case RG_HYLIA_LAB_KEY:
         case RG_FISHING_HOLE_KEY:
             return !ctx->GetOption(RSK_LOCK_OVERWORLD_DOORS) || HasItem(RG_SKELETON_KEY) ||
-                   CheckRandoInf(StaticData::RandoGetToRandInf[itemName]);
+                   CheckRandoInf(StaticData::RandoGetToRandInf.at(itemName));
             // Boss Keys
         case RG_FOREST_TEMPLE_BOSS_KEY:
         case RG_FIRE_TEMPLE_BOSS_KEY:
@@ -239,7 +236,7 @@ bool Logic::HasItem(RandomizerGet itemName) {
         case RG_SPIRIT_TEMPLE_BOSS_KEY:
         case RG_SHADOW_TEMPLE_BOSS_KEY:
         case RG_GANONS_CASTLE_BOSS_KEY:
-            return CheckDungeonItem(DUNGEON_KEY_BOSS, RandoGetToDungeonScene[itemName]);
+            return CheckDungeonItem(DUNGEON_KEY_BOSS, RandoGetToDungeonScene.at(itemName));
             // Maps
         case RG_DEKU_TREE_MAP:
         case RG_DODONGOS_CAVERN_MAP:
@@ -251,7 +248,7 @@ bool Logic::HasItem(RandomizerGet itemName) {
         case RG_SHADOW_TEMPLE_MAP:
         case RG_BOTTOM_OF_THE_WELL_MAP:
         case RG_ICE_CAVERN_MAP:
-            return CheckDungeonItem(DUNGEON_MAP, RandoGetToDungeonScene[itemName]);
+            return CheckDungeonItem(DUNGEON_MAP, RandoGetToDungeonScene.at(itemName));
             // Compasses
         case RG_DEKU_TREE_COMPASS:
         case RG_DODONGOS_CAVERN_COMPASS:
@@ -263,7 +260,7 @@ bool Logic::HasItem(RandomizerGet itemName) {
         case RG_SHADOW_TEMPLE_COMPASS:
         case RG_BOTTOM_OF_THE_WELL_COMPASS:
         case RG_ICE_CAVERN_COMPASS:
-            return CheckDungeonItem(DUNGEON_COMPASS, RandoGetToDungeonScene[itemName]);
+            return CheckDungeonItem(DUNGEON_COMPASS, RandoGetToDungeonScene.at(itemName));
             // Wallets
         case RG_ADULT_WALLET:
             return CurrentUpgrade(UPG_WALLET) >= 1;
@@ -552,12 +549,8 @@ bool Logic::CanUse(RandomizerGet itemName) {
             return true; // AmmoCanDrop || (HasBottle() && Get(LOGIC_BUY_MAGIC_POTION))
         case RG_DINS_FIRE:
         case RG_FARORES_WIND:
-        case RG_LENS_OF_TRUTH:
-            return CanUse(RG_MAGIC_SINGLE);
         case RG_NAYRUS_LOVE:
-            if (ctx->GetOption(RSK_NAYRUS_LOVE_USES).Get() > 0) {
-                return false;
-            }
+        case RG_LENS_OF_TRUTH:
             return CanUse(RG_MAGIC_SINGLE);
         case RG_FIRE_ARROWS:
         case RG_ICE_ARROWS:
@@ -1079,7 +1072,7 @@ bool Logic::CanKillEnemy(RandomizerEnemy enemy, EnemyDistance distance, bool wal
             // RANDOTODO make a function to track our ammo vs his HP when ammo capacity is taken into account in logic
             //  all swords can at least trade blows with dark link, and even with 1 damage a slash it works out
             return CanUseSword() ||
-                   // Boomerang is a reliable, infinite ammo stun, so it enables any way to get enough damage with the
+                   // Boomerang is a relaible, infinite ammo stun, so it enables any way to get enough damage with the
                    // ammo we have Max HP dark link has 40 HP, bows and bombs do 2 so 20 ammo, stick jumpslash does 4 so
                    // 10 sticks
                    (CanUse(RG_BOOMERANG) &&
@@ -1209,7 +1202,7 @@ bool Logic::CanPassEnemy(RandomizerEnemy enemy, EnemyDistance distance, bool wal
 }
 
 // Can we avoid this enemy while climbing up a wall, or doing a difficult platforming challenge?
-// use grounded if the challenge is such that the enemy interferes even if it cannot hit link out of the air
+// use grounded if the challenge is such that the enemy interfears even if it cannot hit link out of the air
 bool Logic::CanAvoidEnemy(RandomizerEnemy enemy, EnemyDistance distance, bool grounded, uint8_t quantity) {
     // DISTANCE AND WALL ASSUMED, add more arguments later if needed
     if (CanKillEnemy(enemy, distance, true, quantity)) {
@@ -1505,7 +1498,7 @@ bool Logic::WaterRisingTargetTo3FCentral() {
  * changed out of logic
  *
  * Extending from these 3, LOGIC_WATER_COULD_LOW_FROM_HIGH and LOGIC_WATER_COULD_HIGH_FROM_MID tell us if we can move
- * from 1 level to the next, without us first having to confirm we can always do the preceding level first. These allow
+ * from 1 level to the next, without us first having to confirm we can always do the preceeding level first. These allow
  * us to check for conditions where we can complete a water level loop and reach any level from any level before we know
  * for sure we have real access. MIDDLE_EMBLEM always requires low water, so FROM_LOW is implied in
  * LOGIC_WATER_COULD_MIDDLE.
@@ -1838,7 +1831,7 @@ uint16_t Logic::FireTimer() {
 }
 
 // Tunic is not required if you are using irons to do something that a simple gold scale dive could do, and you are not
-// in water temple. (ceiling swimming and long walks through water do not count)
+// in water temple. (celing swimming and long walks through water do not count)
 uint16_t Logic::WaterTimer() {
     if (CanUse(RG_ZORA_TUNIC)) {
         return UINT16_MAX;
@@ -2034,19 +2027,7 @@ bool Logic::SmallKeys(SceneID scene, uint8_t requiredAmount) {
     return GetSmallKeyCount(scene) >= requiredAmount;
 }
 
-// Lookup tables indexed by RandomizerGet. Items not listed get the fill value.
-template <typename T, size_t N>
-static constexpr std::array<T, RG_MAX> ToRandoGetArray(const std::pair<RandomizerGet, T> (&pairs)[N],
-                                                       std::type_identity_t<T> fill = T{}) {
-    std::array<T, RG_MAX> array{};
-    array.fill(fill);
-    for (const auto& [randoGet, value] : pairs) {
-        array[randoGet] = value;
-    }
-    return array;
-}
-
-static constexpr std::pair<RandomizerGet, uint32_t> equipFlagTable[] = {
+std::map<RandomizerGet, uint32_t> Logic::RandoGetToEquipFlag = {
     { RG_KOKIRI_SWORD, EQUIP_FLAG_SWORD_KOKIRI },       { RG_MASTER_SWORD, EQUIP_FLAG_SWORD_MASTER },
     { RG_GIANTS_KNIFE, EQUIP_FLAG_SWORD_BGS },          { RG_BIGGORON_SWORD, EQUIP_FLAG_SWORD_BGS },
     { RG_DEKU_SHIELD, EQUIP_FLAG_SHIELD_DEKU },         { RG_HYLIAN_SHIELD, EQUIP_FLAG_SHIELD_HYLIAN },
@@ -2056,9 +2037,8 @@ static constexpr std::pair<RandomizerGet, uint32_t> equipFlagTable[] = {
     { RG_BUY_ZORA_TUNIC, EQUIP_FLAG_TUNIC_ZORA },       { RG_IRON_BOOTS, EQUIP_FLAG_BOOTS_IRON },
     { RG_HOVER_BOOTS, EQUIP_FLAG_BOOTS_HOVER }
 };
-const std::array<uint32_t, RG_MAX> Logic::RandoGetToEquipFlag = ToRandoGetArray(equipFlagTable);
 
-static constexpr std::pair<RandomizerGet, uint32_t> randInfTable[] = {
+std::map<RandomizerGet, uint32_t> StaticData::RandoGetToRandInf = {
     { RG_BRONZE_SCALE, RAND_INF_CAN_SWIM },
     { RG_POWER_BRACELET, RAND_INF_CAN_GRAB },
     { RG_ZELDAS_LETTER, RAND_INF_ZELDAS_LETTER },
@@ -2153,9 +2133,8 @@ static constexpr std::pair<RandomizerGet, uint32_t> randInfTable[] = {
     { RG_HYLIA_LAB_KEY, RAND_INF_HYLIA_LAB_KEY_OBTAINED },
     { RG_FISHING_HOLE_KEY, RAND_INF_FISHING_HOLE_KEY_OBTAINED },
 };
-const std::array<uint32_t, RG_MAX> StaticData::RandoGetToRandInf = ToRandoGetArray(randInfTable, RAND_INF_MAX);
 
-static constexpr std::pair<RandomizerGet, SceneID> dungeonSceneTable[] = {
+std::map<uint32_t, SceneID> Logic::RandoGetToDungeonScene = {
     { RG_FOREST_TEMPLE_SMALL_KEY, SCENE_FOREST_TEMPLE },
     { RG_FIRE_TEMPLE_SMALL_KEY, SCENE_FIRE_TEMPLE },
     { RG_WATER_TEMPLE_SMALL_KEY, SCENE_WATER_TEMPLE },
@@ -2203,9 +2182,8 @@ static constexpr std::pair<RandomizerGet, SceneID> dungeonSceneTable[] = {
     { RG_TREASURE_GAME_SMALL_KEY, SCENE_TREASURE_BOX_SHOP },
     { RG_TREASURE_GAME_KEY_RING, SCENE_TREASURE_BOX_SHOP }
 };
-const std::array<SceneID, RG_MAX> Logic::RandoGetToDungeonScene = ToRandoGetArray(dungeonSceneTable, SCENE_ID_MAX);
 
-static constexpr std::pair<RandomizerGet, uint32_t> questItemTable[] = {
+std::map<uint32_t, uint32_t> Logic::RandoGetToQuestItem = {
     { RG_FOREST_MEDALLION, QUEST_MEDALLION_FOREST },
     { RG_FIRE_MEDALLION, QUEST_MEDALLION_FIRE },
     { RG_WATER_MEDALLION, QUEST_MEDALLION_WATER },
@@ -2230,7 +2208,6 @@ static constexpr std::pair<RandomizerGet, uint32_t> questItemTable[] = {
     { RG_STONE_OF_AGONY, QUEST_STONE_OF_AGONY },
     { RG_GERUDO_MEMBERSHIP_CARD, QUEST_GERUDO_CARD },
 };
-const std::array<uint32_t, RG_MAX> Logic::RandoGetToQuestItem = ToRandoGetArray(questItemTable);
 
 std::map<uint32_t, uint32_t> BottleRandomizerGetToItemID = {
     { RG_BOTTLE_WITH_RED_POTION, ITEM_POTION_RED },
@@ -2296,11 +2273,10 @@ std::set<RandomizerGet> StaticData::allowBottleMaskTrade = { RG_KEATON_MASK,
 
 void Logic::ApplyItemEffect(Item& item, bool state) {
     auto randoGet = item.GetRandomizerGet();
-    const uint16_t objectId = item.GetGIEntry()->objectId;
-    if (objectId == OBJECT_GI_STICK) {
+    if (item.GetGIEntry()->objectId == OBJECT_GI_STICK) {
         SetInventory(ITEM_STICK, (!state ? ITEM_NONE : ITEM_STICK));
     }
-    if (objectId == OBJECT_GI_NUTS) {
+    if (item.GetGIEntry()->objectId == OBJECT_GI_NUTS) {
         SetInventory(ITEM_NUT, (!state ? ITEM_NONE : ITEM_NUT));
     }
     switch (item.GetItemType()) {
@@ -2308,7 +2284,7 @@ void Logic::ApplyItemEffect(Item& item, bool state) {
             switch (randoGet) {
                 case RG_STONE_OF_AGONY:
                 case RG_GERUDO_MEMBERSHIP_CARD:
-                    SetQuestItem(RandoGetToQuestItem[randoGet], state);
+                    SetQuestItem(RandoGetToQuestItem.at(randoGet), state);
                     break;
                 case RG_WEIRD_EGG:
                     SetRandoInf(RAND_INF_WEIRD_EGG, state);
@@ -2628,7 +2604,7 @@ void Logic::ApplyItemEffect(Item& item, bool state) {
                 case RG_BACK_TOWER_KEY:
                 case RG_HYLIA_LAB_KEY:
                 case RG_FISHING_HOLE_KEY:
-                    SetRandoInf(StaticData::RandoGetToRandInf[randoGet], state);
+                    SetRandoInf(StaticData::RandoGetToRandInf.at(randoGet), state);
                     break;
                 case RG_TRIFORCE_PIECE:
                     mSaveContext->ship.quest.data.randomizer.triforcePiecesCollected += (!state ? -1 : 1);
@@ -2666,7 +2642,7 @@ void Logic::ApplyItemEffect(Item& item, bool state) {
             if (itemRG == RG_DEKU_SHIELD || itemRG == RG_HYLIAN_SHIELD) {
                 return;
             }
-            uint32_t equipId = RandoGetToEquipFlag[itemRG];
+            uint32_t equipId = RandoGetToEquipFlag.find(itemRG)->second;
             if (!state) {
                 mSaveContext->inventory.equipment &= ~equipId;
                 if (equipId == EQUIP_FLAG_SWORD_BGS && itemRG != RG_GIANTS_KNIFE) {
@@ -2681,16 +2657,16 @@ void Logic::ApplyItemEffect(Item& item, bool state) {
         } break;
         case ITEMTYPE_DUNGEONREWARD:
         case ITEMTYPE_SONG:
-            SetQuestItem(RandoGetToQuestItem[randoGet], state);
+            SetQuestItem(RandoGetToQuestItem.find(item.GetRandomizerGet())->second, state);
             break;
         case ITEMTYPE_MAP:
-            SetDungeonItem(DUNGEON_MAP, RandoGetToDungeonScene[randoGet], state);
+            SetDungeonItem(DUNGEON_MAP, RandoGetToDungeonScene.find(item.GetRandomizerGet())->second, state);
             break;
         case ITEMTYPE_COMPASS:
-            SetDungeonItem(DUNGEON_COMPASS, RandoGetToDungeonScene[randoGet], state);
+            SetDungeonItem(DUNGEON_COMPASS, RandoGetToDungeonScene.find(item.GetRandomizerGet())->second, state);
             break;
         case ITEMTYPE_BOSSKEY:
-            SetDungeonItem(DUNGEON_KEY_BOSS, RandoGetToDungeonScene[randoGet], state);
+            SetDungeonItem(DUNGEON_KEY_BOSS, RandoGetToDungeonScene.find(item.GetRandomizerGet())->second, state);
             break;
         case ITEMTYPE_SILVER: {
             auto randoGet = item.GetRandomizerGet();
@@ -2715,7 +2691,7 @@ void Logic::ApplyItemEffect(Item& item, bool state) {
         case ITEMTYPE_SMALLKEY: {
             auto randoGet = item.GetRandomizerGet();
             auto keyring = randoGet >= RG_FOREST_TEMPLE_KEY_RING && randoGet <= RG_TREASURE_GAME_KEY_RING;
-            auto dungeonIndex = RandoGetToDungeonScene[randoGet];
+            auto dungeonIndex = RandoGetToDungeonScene.find(randoGet)->second;
             auto count = GetSmallKeyCount(dungeonIndex);
             if (!state) {
                 if (keyring) {
@@ -2743,7 +2719,7 @@ void Logic::ApplyItemEffect(Item& item, bool state) {
             RandomizerGet itemRG = item.GetRandomizerGet();
             if (itemRG == RG_BUY_HYLIAN_SHIELD || itemRG == RG_BUY_DEKU_SHIELD || itemRG == RG_BUY_GORON_TUNIC ||
                 itemRG == RG_BUY_ZORA_TUNIC) {
-                uint32_t equipId = RandoGetToEquipFlag[itemRG];
+                uint32_t equipId = RandoGetToEquipFlag.find(itemRG)->second;
                 if (!state) {
                     mSaveContext->inventory.equipment &= ~equipId;
                 } else {
@@ -2926,12 +2902,10 @@ void Logic::InitSaveContext() {
 }
 
 void Logic::NewSaveContext() {
-    // Reuse save context instead of allocating new one every reset
-    if (mSaveContext == nullptr || mSaveContext == &gSaveContext) {
-        mSaveContext = new SaveContext();
-    } else {
-        *mSaveContext = SaveContext();
+    if (mSaveContext != nullptr && mSaveContext != &gSaveContext) {
+        delete mSaveContext;
     }
+    mSaveContext = new SaveContext();
     InitSaveContext();
 }
 

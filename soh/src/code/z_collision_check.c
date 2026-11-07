@@ -1,4 +1,5 @@
 #include "global.h"
+#include "soh/Enhancements/NxtRpg/NxtBridge.h"
 #include "vt.h"
 #include "overlays/effects/ovl_Effect_Ss_HitMark/z_eff_ss_hitmark.h"
 #include "soh/Enhancements/game-interactor/GameInteractor.h"
@@ -1724,10 +1725,17 @@ void CollisionCheck_SetBounce(Collider* at, Collider* ac) {
  */
 s32 CollisionCheck_SetATvsAC(PlayState* play, Collider* at, ColliderInfo* atInfo, Vec3f* atPos, Collider* ac,
                              ColliderInfo* acInfo, Vec3f* acPos, Vec3f* hitPos) {
-    if (ac->acFlags & AC_HARD && at->actor != NULL && ac->actor != NULL) {
+    const s32 nxtBotHit = Nxt_IsBotActor(ac->actor);
+
+    // Native AT_HIT callbacks often apply damage, knockback or grabs directly
+    // to GET_PLAYER (including rolling boulders and Deku Tree spike logs).
+    // An NXT adventurer is an independent victim: keep its AC hit/damage, but
+    // never feed a bot contact into those player-only native reactions. Do not
+    // clear existing AT state: this attack may also genuinely have hit Link.
+    if (!nxtBotHit && (ac->acFlags & AC_HARD) && at->actor != NULL && ac->actor != NULL) {
         CollisionCheck_SetBounce(at, ac);
     }
-    if (!(acInfo->bumperFlags & BUMP_NO_AT_INFO)) {
+    if (!nxtBotHit && !(acInfo->bumperFlags & BUMP_NO_AT_INFO)) {
         at->atFlags |= AT_HIT;
         at->at = ac->actor;
         atInfo->atHit = ac;
@@ -1741,6 +1749,7 @@ s32 CollisionCheck_SetATvsAC(PlayState* play, Collider* at, ColliderInfo* atInfo
     ac->ac = at->actor;
     acInfo->acHit = at;
     acInfo->acHitInfo = atInfo;
+    Nxt_RecordCollision(at->actor, ac->actor, atInfo->toucher.damage);
     acInfo->bumperFlags |= BUMP_HIT;
     if (ac->actor != NULL) {
         ac->actor->colChkInfo.acHitEffect = atInfo->toucher.effect;
@@ -2076,7 +2085,7 @@ void CollisionCheck_AC_QuadVsJntSph(PlayState* play, CollisionCheckContext* colC
             }
             if (Math3D_TriVsSphIntersect(&acElem->dim.worldSphere, &D_8015E2A0, &hitPos) == 1 ||
                 Math3D_TriVsSphIntersect(&acElem->dim.worldSphere, &D_8015E2D8, &hitPos) == 1) {
-                if (Collider_QuadSetNearestAC(play, at, &hitPos)) {
+                if (Nxt_IsBotActor(ac->base.actor) || Collider_QuadSetNearestAC(play, at, &hitPos)) {
                     Vec3f atPos;
                     Vec3f acPos;
 
@@ -2277,7 +2286,9 @@ void CollisionCheck_AC_QuadVsCyl(PlayState* play, CollisionCheckContext* colChkC
         Math3D_TriNorm(&D_8015E3A0, &at->dim.quad[2], &at->dim.quad[3], &at->dim.quad[1]);
         Math3D_TriNorm(&D_8015E3D8, &at->dim.quad[2], &at->dim.quad[1], &at->dim.quad[0]);
         if (Math3D_CylTriVsIntersect(&ac->dim, &D_8015E3A0, &D_8015E410) == 1) {
-            if (Collider_QuadSetNearestAC(play, at, &D_8015E410)) {
+            // Independent bot hurtboxes must not replace the nearest real
+            // victim or clear Link's already-recorded AC hit (hostile arrows).
+            if (Nxt_IsBotActor(ac->base.actor) || Collider_QuadSetNearestAC(play, at, &D_8015E410)) {
                 Vec3f atPos1;
                 Vec3f acPos1;
 
@@ -2291,7 +2302,7 @@ void CollisionCheck_AC_QuadVsCyl(PlayState* play, CollisionCheckContext* colChkC
             }
         }
         if (Math3D_CylTriVsIntersect(&ac->dim, &D_8015E3D8, &D_8015E410) == 1) {
-            if (Collider_QuadSetNearestAC(play, at, &D_8015E410)) {
+            if (Nxt_IsBotActor(ac->base.actor) || Collider_QuadSetNearestAC(play, at, &D_8015E410)) {
                 Vec3f atPos2;
                 Vec3f acPos2;
 
@@ -2426,7 +2437,7 @@ void CollisionCheck_AC_QuadVsTris(PlayState* play, CollisionCheckContext* colChk
             }
             if (Math3D_TriVsTriIntersect(&D_8015E4C0, &acElem->dim, &D_8015E4B0) == 1 ||
                 Math3D_TriVsTriIntersect(&D_8015E4F8, &acElem->dim, &D_8015E4B0) == 1) {
-                if (Collider_QuadSetNearestAC(play, at, &D_8015E4B0)) {
+                if (Nxt_IsBotActor(ac->base.actor) || Collider_QuadSetNearestAC(play, at, &D_8015E4B0)) {
                     Vec3f atPos;
                     Vec3f acPos;
 
@@ -2478,7 +2489,7 @@ void CollisionCheck_AC_QuadVsQuad(PlayState* play, CollisionCheckContext* colChk
     for (i = 0; i < 2; i++) {
         for (j = 0; j < 2; j++) {
             if (Math3D_TriVsTriIntersect(&D_8015E5A8[j], &D_8015E530[i], &D_8015E598) == 1) {
-                if (Collider_QuadSetNearestAC(play, at, &D_8015E598)) {
+                if (Nxt_IsBotActor(ac->base.actor) || Collider_QuadSetNearestAC(play, at, &D_8015E598)) {
                     Vec3f atPos;
                     Vec3f acPos;
 

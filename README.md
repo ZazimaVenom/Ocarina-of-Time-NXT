@@ -4,6 +4,8 @@
 * [Website](https://www.shipofharkinian.com)
 * [Discord](https://discord.com/invite/harbourmasters)
 
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File ".\Build-Nxt.ps1" -Jobs 4
+
 If you're having any trouble after reading through this `README`, feel free to ask for help in the Support text channels. Please keep in mind that we do not condone piracy.
 
 # Quick Start
@@ -79,8 +81,7 @@ If you want to playtest a continuous integration build, you can find them at the
 
 * [Windows](https://nightly.link/HarbourMasters/Shipwright/workflows/generate-builds/develop/soh-windows.zip)
 * [macOS](https://nightly.link/HarbourMasters/Shipwright/workflows/generate-builds/develop/soh-mac.zip)
-* [Linux X86_64](https://nightly.link/HarbourMasters/Shipwright/workflows/generate-builds/develop/soh-linux-x86_64.zip)
-* [Linux ARM](https://nightly.link/HarbourMasters/Shipwright/workflows/generate-builds/develop/soh-linux-aarch64.zip)
+* [Linux](https://nightly.link/HarbourMasters/Shipwright/workflows/generate-builds/develop/soh-linux.zip)
 
 ### Further Reading
 More detailed documentation can be found in the 'docs' directory, including the aforementioned [building instructions](docs/BUILDING.md).

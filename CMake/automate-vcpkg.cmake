@@ -82,7 +82,11 @@ if (WIN32)
 endif()
 
 if(NOT DEFINED VCPKG_ROOT)
-	set(VCPKG_ROOT ${VCPKG_FALLBACK_ROOT})
+    if(NOT DEFINED ENV{VCPKG_ROOT})
+	    set(VCPKG_ROOT ${VCPKG_FALLBACK_ROOT})
+    else()
+        set(VCPKG_ROOT $ENV{VCPKG_ROOT})
+    endif()
 endif()
 
 # Installs a new copy of Vcpkg or updates an existing one

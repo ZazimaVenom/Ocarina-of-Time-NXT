@@ -1,4 +1,5 @@
 #include "global.h"
+#include "soh/Enhancements/NxtRpg/NxtBridge.h"
 #include "vt.h"
 
 #include "overlays/actors/ovl_Arms_Hook/z_arms_hook.h"
@@ -4775,6 +4776,10 @@ u8 func_800355E4(PlayState* play, Collider* collider) {
 }
 
 u8 Actor_ApplyDamage(Actor* actor) {
+    const int nxtHealth = Nxt_ApplyNativeDamage(actor);
+    if (nxtHealth >= 0) {
+        return (u8)nxtHealth;
+    }
     if (actor->colChkInfo.damage >= actor->colChkInfo.health) {
         actor->colChkInfo.health = 0;
     } else {
